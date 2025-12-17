@@ -46,6 +46,9 @@
         options.navTextsRgbIntensity = options.hasOwnProperty('navTextsRgbIntensity') ? options.navTextsRgbIntensity : 10; 
         options.imagesRgbIntensity = options.hasOwnProperty('imagesRgbIntensity') ? options.imagesRgbIntensity : 0.9;
         options.navImagesRgbIntensity= options.hasOwnProperty('navImagesRgbIntensity') ? options.navImagesRgbIntensity : 100;
+        // autoplay options
+        options.autoplay = options.hasOwnProperty('autoplay') ? options.autoplay : false;
+        options.autoplayDelay = options.hasOwnProperty('autoplayDelay') ? options.autoplayDelay : 5000;
 
         ///////////////////////////////    
 
@@ -87,6 +90,7 @@
         // main elements
         let render; // pixi render
         let mainLoopID; // raf
+        let autoplayID; // autoplay interval id
 
         let slideImages;
         let slideTexts;
@@ -907,6 +911,27 @@
             cursorInteractive();
             swipe();
             slideTransition(currentIndex);
+
+            // autoplay loop
+            if (options.autoplay === true) {
+                // clear any existing interval just in case
+                if (autoplayID) {
+                    clearInterval(autoplayID);
+                }
+                autoplayID = setInterval(function () {
+                    // don't start a new transition if one is already playing
+                    if (is_playing) {
+                        return;
+                    }
+                    let nextIndex;
+                    if (currentIndex >= 0 && currentIndex < options.slideImages.length - 1) {
+                        nextIndex = currentIndex + 1;
+                    } else {
+                        nextIndex = 0;
+                    }
+                    slideTransition(nextIndex);
+                }, options.autoplayDelay);
+            }
             
             // Listen for window resize events
             window.addEventListener('resize', resizeTexts);
